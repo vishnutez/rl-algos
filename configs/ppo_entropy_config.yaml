@@ -1,0 +1,76 @@
+# PPO with Entropy Weighting Configuration for MuJoCo Hopper
+# This configuration file contains all the hyperparameters for training PPO with entropy weighting
+
+# Environment configuration
+env:
+  # Environment-specific parameters
+  normalize_obs: true          # Whether to normalize observations
+  frame_stack: 1               # Number of frames to stack (1 = no stacking)
+  reward_scale: 1.0            # Global reward scaling factor
+  max_episode_steps: 1000      # Maximum steps per episode
+  env_kwargs:                  # Additional arguments for HopperEnv
+    render_mode: null
+    max_episode_steps: 1000
+    reward_scale: 1.0
+    control_cost_weight: 0.001
+    forward_reward_weight: 1.0
+    healthy_reward: 1.0
+    terminate_when_unhealthy: true
+    healthy_z_range: [0.7, inf]
+    healthy_angle_range: [-0.2, 0.2]
+    reset_noise_scale: 0.1
+
+# Algorithm configuration
+algorithm:
+  # PPO hyperparameters
+  learning_rate: 3e-4          # Learning rate for optimization
+  n_steps: 2048                # Number of steps to collect per update
+  batch_size: 64               # Batch size for training
+  n_epochs: 10                 # Number of training epochs per update
+  gamma: 0.99                  # Discount factor
+  gae_lambda: 0.95             # GAE lambda parameter
+  clip_range: 0.2              # PPO clipping parameter
+  ent_coef: 0.01               # Initial entropy coefficient
+  vf_coef: 0.5                 # Value function coefficient
+  max_grad_norm: 0.5           # Maximum gradient norm for clipping
+  target_kl: null              # Target KL divergence for early stopping (null to disable)
+  
+  # Entropy weighting specific parameters
+  target_entropy: null         # Target entropy (null to use -action_dim)
+  ent_coef_lr: 0.001          # Learning rate for entropy coefficient
+  ent_coef_decay: 0.999        # Decay rate for entropy coefficient
+  min_ent_coef: 0.001          # Minimum entropy coefficient
+  max_ent_coef: 1.0            # Maximum entropy coefficient
+  
+  # Device and reproducibility
+  device: "auto"                # Device to run on ("auto", "cpu", "cuda")
+  seed: 42                     # Random seed for reproducibility
+  verbose: 1                   # Verbosity level (0, 1, 2)
+
+# Training configuration
+training:
+  # Training parameters
+  log_interval: 4              # Log every log_interval updates
+  save_freq: 50000            # Save model every save_freq timesteps
+  eval_freq: 10000             # Evaluate every eval_freq timesteps (-1 to disable)
+  n_eval_episodes: 5          # Number of episodes for evaluation
+  
+  # Early stopping (optional)
+  early_stopping:
+    enabled: false             # Whether to use early stopping
+    patience: 100              # Number of updates to wait before stopping
+    min_delta: 0.01            # Minimum change to qualify as improvement
+    monitor: "mean_reward"     # Metric to monitor
+
+# Logging configuration
+logging:
+  log_dir: "logs/ppo_entropy"  # Directory to save logs
+  model_dir: "models/ppo_entropy" # Directory to save models
+  tensorboard: true             # Whether to use TensorBoard logging
+  wandb: false                  # Whether to use Weights & Biases logging
+  
+# Evaluation configuration
+evaluation:
+  n_eval_episodes: 10          # Number of episodes for final evaluation
+  render: false                 # Whether to render during evaluation
+  deterministic: true           # Whether to use deterministic policy for evaluation
